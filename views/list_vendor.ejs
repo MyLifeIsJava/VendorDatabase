@@ -1,0 +1,20 @@
+
+<%if (vendors.length > 0) { %>
+  <b>Vendors:</b><br>
+<table cellspacing='0' cellpadding='2' border='1'>
+  <tr><th>Company</th><th>Area of work</th><th>Sub-area of work</th><th>Contact Name</th><th>Email</th><th>Phone</th><th>State</th><th>City</th><th>Locality</th></tr>
+  <% for(var i=0; i<vendors.length; i++) {%>
+    <tr>
+      <td><%= vendors[i].company_name %></td>
+      <td class='matched_column'><%= vendors[i].working_area %></td>
+      <td class='matched_column'><%= vendors[i].working_sub_area %></td>
+      <td><%= vendors[i].contact_name %></td>
+      <td><%= vendors[i].email %></td>
+      <td><%= vendors[i].phone %></td>
+      <td><%= vendors[i].state %></td>
+      <td><%= vendors[i].city %></td>
+      <td><%= vendors[i].locality %></td>
+    </tr>
+  <% } %>
+</table>
+<% } %>

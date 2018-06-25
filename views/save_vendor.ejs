@@ -1,0 +1,115 @@
+<html>
+<head>
+  <style>
+  .error{color: red; font-style: italic;}
+  input.error {border: 1px dotted red;}
+  </style>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/jquery.form.min.js"></script>
+  <script src="/js/jquery.validate.min.js"></script>
+  <!-- TODO: Move the javascript here to a separate js file -->
+  <script>
+    /* Auto submit the vising card form as and when user selects the file */
+    /*$('#visitingCardFile').change(function() {
+      $('#visitingCardForm').submit();
+    });*/
+    /* Auto submit the brochure form as and when user selects the file */
+    /*$('#brochureFile').change(function() {
+      $('#brochureForm').submit();
+    });*/
+
+    $().ready(function() {
+      /* Submit the main form on click of Save button */
+      $('#formSubmitBtn').click(
+        function(){
+          $("#saveVendorForm").submit()
+          //alert("Button clicked");
+        }
+      );
+      /* Submit the visiting card form using Ajax*/
+      /*
+      $('#visitingCardForm').submit(function() {
+         $("#visitingcardUploadStatus").empty().text("Uploading...");
+         $(this).ajaxSubmit({
+             error: function(xhr) {
+               $("#visitingcardUploadStatus").empty().text("Failed to upload the file!");
+             },
+             success: function(response) {
+               $("#status").empty().text(response);
+              console.log(response);
+             }
+           });
+         //Very important line, it disable the page refresh.
+         return false;
+      });
+      */
+
+      /* Form validations, mainly checking for mandatory fields */
+      $("#saveVendorForm").validate({
+        rules: {
+          company_name: "required",
+          contact_name: "required",
+          working_area: "required",
+          state: "required",
+          city: "required",
+          email: {
+            required: true,
+            email: true
+          },
+          phone: "required"
+        },
+        messages: {
+          company_name: "Please specify the company name",
+          contact_name: "Please specify the contact person name",
+          working_area: "Please specify the working area",
+          state: "Please specify the state",
+          city: "Please specify the city",
+          email: "Please enter a valid email address",
+          phone: "Please specify the phone"
+        },
+        submitHandler: function(form) {
+          $.ajax({
+              url: form.action,
+              type: form.method,
+              data: $(form).serialize(),
+              error: function(xhr) {
+                alert("Failed to save the vendor details!");
+              },
+              success: function(response) {
+                alert(response);
+              }
+            });
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+<b>Add Vendor.</b><br>
+<form id="saveVendorForm" action="/saveVendor" method="POST">
+  <table>
+    <tr><td>Company Name</td><td><input type="text" placeholder="Company Name" name="company_name"/></td></tr>
+    <tr><td>Contact Person Name</td><td><input type="text" placeholder="Contact Person Name" name="contact_name"/></td></tr>
+    <tr><td>Area of working</td><td><input type="text" placeholder="Area of working" name="working_area"/></td></tr>
+    <tr><td>Sub-area of working</td><td><input type="text" placeholder="Sub-area of working" name="working_sub_area"/></td></tr>
+    <tr><td>Email</td><td><input type="text" placeholder="Email" name="email"/></td></tr>
+    <tr><td>Phone</td><td><input type="text" placeholder="Phone" name="phone"/></td></tr>
+    <tr><td>State</td><td><input type="text" placeholder="State" name="state"/></td></tr>
+    <tr><td>City</td><td><input type="text" placeholder="City" name="city"/></td></tr>
+    <tr><td>Locality</td><td><input type="text" placeholder="Locality" name="locality"/></td></tr>
+    <tr><td>Address</td><td><input type="text" placeholder="Address" name="address"/></td></tr>
+</form>
+<!--
+<form id="visitingCardForm" action="" method="POST" enctype="multipart/form-data">
+    <tr><td>Vising Card</td><td><input type="file" id="visitingCardFile" name="file" size="50"/></td><td><div id="visitingcardUploadStatus"></div></td></tr>
+</form>
+<form id="brochureForm" action="" method="POST" enctype="multipart/form-data">
+    <tr><td>Brochure</td><td><input type="file" id="brochureFile" name="file" size="50"/></td><td><div id="brochureUploadStatus"></div></td></tr>
+</form>
+-->
+    <tr><td colspan=2><input id="formSubmitBtn" type='button' value='Save Vendor'/></td></tr>
+
+</table>
+
+</body>
+</html>

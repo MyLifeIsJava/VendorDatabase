@@ -1,0 +1,61 @@
+<html>
+
+  <head>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.form.min.js"></script>
+    <script>
+    $(document).ready(function() {
+
+         $('#uploadForm').submit(function() {
+            $("#status").empty().text("File is uploading...");
+            $(this).ajaxSubmit({
+
+                error: function(xhr) {
+            status('Error: ' + xhr.status);
+                },
+
+                success: function(response) {
+            $("#status").empty().text(response);
+                    console.log(response);
+                }
+        });
+            //Very important line, it disable the page refresh.
+        return false;
+        });
+    });
+    </script>
+  </head>
+   <body>
+
+     <hr>
+     <h1>Simple Form - POST</h1>
+      <form action = "/process_post" method = "POST">
+         First Name: <input type = "text" name = "first_name">  <br>
+         Last Name: <input type = "text" name = "last_name">
+         <input type = "submit" value = "Submit">
+      </form>
+      <hr>
+
+      <h1>File Upload - Synchronous</h1>
+      Select a file to upload: <br />
+      <form action = "/file_upload" method = "POST"
+         enctype = "multipart/form-data">
+         <input type="file" name="file" size="50" />
+         <br />
+         <input type = "submit" value = "Upload File" />
+      </form>
+      <hr>
+
+      <h1>File upload - Ajax and Multiple files</h1>
+      <form id="uploadForm" action = "/file_upload" method = "POST"
+         enctype = "multipart/form-data">
+         <input type="file" name="file" size="50" multiple />
+         <br />
+         <input type = "submit" value = "Upload File" />
+         <input type='text' id='random' name='random'><br>
+         <span id = "status"></span>
+      </form>
+      <hr>
+
+   </body>
+</html>

@@ -1,0 +1,40 @@
+<html>
+<head>
+  <style>
+  .error{color: red; font-style: italic;}
+  input.error {border: 1px dotted red;}
+  </style>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/jquery.form.min.js"></script>
+  <script src="/js/jquery.validate.min.js"></script>
+  <script src="/js/jquery.mark.min.js"></script>
+  <!-- TODO: Move the javascript here to a separate js file -->
+  <script>
+    $().ready(function(){
+      $("#searchForm").ajaxForm({
+            url: '/searchVendors',
+            type: 'post',
+            error: function(xhr) {
+              alert("Failed!");
+              $("#searchResults").html('');
+            },
+            success: function(response) {
+              $("#searchResults").html(response);
+              $(".matched_column").mark($("#searchTxt").val());
+            }
+      })
+    });
+  </script>
+
+</head>
+<body>
+  <b>Search Vendors</b>
+  <form action="/searchVendors" id="searchForm" method="POST">
+    <table>
+      <tr><td>Area of work</td><td><input id='searchTxt' type="text" placeholder="Area of work" name="area"/></td></tr>
+      <tr><td colspan=2><button id="formSubmitBtn" type='submit'>Search Vendors</button></td></tr>
+    </table>
+  </form>
+</body>
+
+<div id="searchResults"></div>
