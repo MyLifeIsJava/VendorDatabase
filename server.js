@@ -9,7 +9,8 @@ app.use(express.static('public'));
 app.use(bodyParser.json())
 
 // Initialize MongoDB
-const MongoClient = require('mongodb').MongoClient
+const mongo = require('mongodb');
+const MongoClient = mongo.MongoClient
 var mongoDBUrl = 'mongodb://localhost/VendorDB';
 // Create the database
 MongoClient.connect(mongoDBUrl, function(err, db) {
@@ -29,13 +30,15 @@ MongoClient.connect(mongoDBUrl, function(err, database) {
   });
 });
 
+const uploadFileLocation = './public/documents';
 //Uploaded files will be in folder "uploads"
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, './uploads');
+    callback(null, uploadFileLocation);
   },
   filename: function (req, file, callback) {
-    callback(null,  Date.now() + '_' + file.originalname);
+    var type = req.body.type;
+    callback(null,  type + "_" + Date.now() + '_' + file.originalname);
   }
 });
 //The field name in HTML must be "file"
@@ -51,14 +54,12 @@ app.get('/list_vendor.html', function(req, res){
 app.post('/searchVendors', urlencodedParser, function(req, res){
   try {
     var area = req.body.area;
-    console.log("searchVendors="+area)
     MongoClient.connect(mongoDBUrl, function(err, database){
       if(err){
         console.log("Error connecting to DB: " + err);
         res.end('Failed to save the vendor details!');
         return;
       }
-      console.log("Connectd to DB");
       var db = database.db('VendorDB');
 
   // Duplicate check : Check whether this company already exists or not
@@ -73,8 +74,6 @@ app.post('/searchVendors', urlencodedParser, function(req, res){
         if (err){
           console.log(err)
           return "Failed!";
-        }else{
-          console.log("result="+result);
         }
         res.render('list_vendor.ejs', {vendors: result})
       })
@@ -87,9 +86,37 @@ app.post('/searchVendors', urlencodedParser, function(req, res){
 });
 
 // The URL for page to save the vendor
-app.get('/save_vendor.html', function (req, res) {
-   res.render('save_vendor.ejs', null)
+app.get('/add_vendor.html', function (req, res) {
+   res.render('save_vendor.ejs', {"vendor":{}})
 })
+
+app.get('/edit_vendor.html', function (req, res) {
+    var id = req.query.id;
+    if(!id){
+      res.status(404);
+      return;
+    }
+    // Get the obeject for this id
+    MongoClient.connect(mongoDBUrl, function(err, database){
+      var db = database.db('VendorDB');
+      var o_id = new mongo.ObjectID(id);
+      db.collection("vendors").findOne({"_id": o_id}, function(err, result) {
+        database.close();
+        if (err){
+          console.log(err);
+          res.status(500);
+          return;
+        }
+        if(result == null){
+          console.log("Object not found for id " + id);
+          res.status(404);
+          return;
+        }
+        res.render('save_vendor.ejs', {"vendor":result})
+      });
+    });
+})
+
 // The form ACTIOn for saving the vendor
 app.post('/saveVendor', urlencodedParser, function(req, res){
   console.log("saveVendor : Request Body=");
@@ -101,36 +128,63 @@ app.post('/saveVendor', urlencodedParser, function(req, res){
       res.end('Failed to save the vendor details!');
       return;
     }
-    console.log("Connectd to DB");
     var db = database.db('VendorDB');
-
+    // TODO: Check for mandatory fields
 // Duplicate check : Check whether this company already exists or not
+    var vendorId = "";
+    var newVendor = false;
+    if(req.body.id){
+      newVendor = false;
+      vendorId = req.body.id;
+    }else{
+      newVendor = true;
+    }
+    console.log("Inside saveVendor, newVendor="+newVendor+", id="+vendorId);
+
     db.collection('vendors').findOne({'company_name':req.body.company_name}, function(err, result){
       if(err){
         console.log("Error in seacrh: " + err);
-        res.end('Failed to save the vendor details!');
+        res.status(500).send('Failed to save the vendor details!');
         database.close();
         return;
       }else{
         console.log("findOne for " + req.body.company_name+" = "+result)
-        if(result == null){
+        if(result == null || result._id == vendorId){
           console.log("Vendor doesn't exist, adding it");
           // Set the createion time for new vendor
-          req.created_time = Date.now();
+          if(newVendor)
+            req.created_time = Date.now();
           // Set the last updated time
           req.last_updated_time = req.created_time;
-          db.collection('vendors').save(req.body, (err, result) => {
-            database.close();
-            console.log("Saved the vendor: " + JSON.stringify(result));
-            if (err) {
-              console.log(err)
-              res.end("Failed to save the vendor details!");
+          if(newVendor){
+            // Save the new vendor
+            db.collection('vendors').save(req.body, (err, result) => {
+              database.close();
+              console.log("Saved the vendor: " + JSON.stringify(result));
+              if (err) {
+                console.log(err)
+                res.status(500).send("Failed to save the vendor details!");
+                return;
+              }
+              console.log('Vendor saved successfully')
+              res.end('Vendor saved successfully');
               return;
-            }
-            console.log('Vendor saved successfully')
-            res.end('Vendor saved successfully');
-            return;
-          })
+            })
+          }else{
+            // Update the vendor
+            db.collection('vendors').update({"_id": new mongo.ObjectID(vendorId)}, req.body, (err, result) => {
+              database.close();
+              console.log("Updated the vendor: " + JSON.stringify(result));
+              if (err) {
+                console.log(err)
+                res.status(500).send("Failed to update the vendor details!");
+                return;
+              }
+              console.log('Vendor updated successfully')
+              res.end('Vendor updated successfully');
+              return;
+            });
+          }
         }
         else{
           database.close();
@@ -149,10 +203,10 @@ app.post('/file_upload', function (req, res) {
        if(err) {
            return res.end("Error uploading file." + err);
        }
-       var count = req.files.length;
-       var msg = "File is uploaded";
-       if(count > 1)
-          msg = count + " files are uploaded";
+       var msg = "";
+       if(req.file)
+          msg = "/documents/" + req.file.filename;
+       console.log("File name="+msg);
        res.end(msg);
    });
 })
@@ -161,6 +215,6 @@ app.post('/file_upload', function (req, res) {
 var server = app.listen(8080, function () {
     var ip = require("ip");
    console.log("Example app listening at http://%s:8080/", ip.address())
-   console.log("URL : http://%s:8080/save_vendor.html", ip.address())
+   console.log("URL : http://%s:8080/add_vendor.html", ip.address())
    console.log("URL : http://%s:8080/list_vendor.html", ip.address())
 })

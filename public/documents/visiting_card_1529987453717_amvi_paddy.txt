@@ -1,0 +1,156 @@
+----- adb commands -----
+1. adb shell
+2. adb install XXX.apk
+3. adb uninstall com.abc.DEF
+4. adb pull /a/b/c/
+5. adb logcat
+
+______ latest apk - extract source ----
+Issues Not resolved
+1. https://github.com/chzhong/serial-android
+      - Have copied the "serial" package for now. But it does some port in native. So something more is needed
+
+Issues Resolved---
+a. Added "implementation 'commons-net:commons-net:3.6'" to manifest
+b. Changed the amvi_update package to com.amvicube.amvi_update
+c. Replaced the password in below line with "password"
+      about.java : download_async("amvicube.com", "amvi@amvicube.com", "amar@1234", "/Update/PA200/version", "/storage/sdcard0/amvi_update/temp/version");
+      Anyway the above password didn't work when I try the following command
+        $ sftp amvi@amvicube.com amvicube.com
+
+b. Commented below line
+    algo_runn.java : printPhoto(R.drawable.img);
+    Camera2BasicFragment.java : case null:
+    PrinterCommands.java : line 17, 19,
+a. Removed R.java and BuildConfig.java files from source
+b. Replaced all openCV class names
+c. Added to Utils
+      Serial.*
+      FTPReply.*
+d. setRequestedOrientation(0) -> setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+e. Copied below layout files
+      activity_about.xml
+      activity_usr_reports_view.xml
+      reports_all.xml
+      layout_list.xml
+f. Copied below drawables
+      amvi500.jpg
+      l5.jpg
+g. Added some string values in strings.xml
+-----------Notes--------
+1. Error handling
+    a. We can keep a log files which can contain user actions and all exceptions
+    b. We can have an option (menu) to send the error report, which will email the log file(s) to the development team
+____________________________________________________________________________________________________________________________
+1. opencv
+    https://docs.opencv.org/2.4/doc/tutorials/introduction/android_binary_package/O4A_SDK.html
+    http://blog.codeonion.com/2015/11/25/creating-a-new-opencv-project-in-android-studio/
+
+2. Used jadx to view the source files in the apk file
+    Used its GUI tool and opened the apk
+
+----- changes done-----
+1. Removed 'ic_launcher_round.png' & 'ic_launcher_round.xml' from  res folders as it was giving duplicate resource error
+2. Added android:required="false" to the folowing in AndroidManifest.xml to try it out on emulator.
+      <uses-library android:name="com.google.android.things" android:required="false"/>
+3. Copied "/Users/kiran/AndroidDevelopment/amvicube/OpenCV-android-sdk/sdk/native" as "/Users/kiran/AndroidDevelopment/amvicube/amvi_paddy/amvipaddy/src/main" so that opencm gets loaded
+__________________
+address = amvicube.com
+user = amvi@amvicube.com
+pwd = amar@1234
+serverPath = /Update/PA200/version
+destination = /storage/sdcard0/amvi_update/temp/version
+
+https://bitbucket.org/
+sreeramavikram@hotmail.com
+sreeramavikram@gmail.com
+Amv1Paddy$123
+
+_______________________________________
+Motor pins mapping
+PC18 - 29 - GPIO5
+PG12 - 35 - GPIO19
+PG11 - 33 - GPIO13
+PE4 - 37 - GPIO26
+PG10 - 31 - GPIO6
+PE18 - 38 - GPIO20
+PE19 - 40 - GPIO21
+
+Led pins mapping
+PL10 - 07 - GPIO4  (LED matrix)
+PE5 - 36 - GPIO16  (Top 4 LEDs)
+
+________________________
+root@bpi-m3-lcd:/sys/class/leds/BLED0 # cat trigger
+[none] battery-charging-or-full battery-charging battery-full battery-charging-blink-full-solid ac-online usb-online rfkill0 mmc0 mmc1 mmc2 timer heartbeat backlight gpio default-on sleep sunxi_respiration_trigger rfkill1 rfkill2
+root@bpi-m3-lcd:/sys/class/leds/GLED0 # cat trigger
+[none] battery-charging-or-full battery-charging battery-full battery-charging-blink-full-solid ac-online usb-online rfkill0 mmc0 mmc1 mmc2 timer heartbeat backlight gpio default-on sleep sunxi_respiration_trigger rfkill1 rfkill2
+root@bpi-m3-lcd:/sys/class/leds/GLED0 # cat ../RLED0/trigger
+[none] battery-charging-or-full battery-charging battery-full battery-charging-blink-full-solid ac-online usb-online rfkill0 mmc0 mmc1 mmc2 timer heartbeat backlight gpio default-on sleep sunxi_respiration_trigger rfkill1 rfkill2
+____________
+cat /sys/class/gpio_sw/PB0/data
+cat /sys/class/gpio_sw/PB1/data
+cat /sys/class/gpio_sw/PB2/data
+cat /sys/class/gpio_sw/PB3/data
+cat /sys/class/gpio_sw/PC0/data
+cat /sys/class/gpio_sw/PC1/data
+cat /sys/class/gpio_sw/PC17/data
+cat /sys/class/gpio_sw/PC2/data
+cat /sys/class/gpio_sw/PC3/data
+cat /sys/class/gpio_sw/PC4/data
+cat /sys/class/gpio_sw/PC7/data
+cat /sys/class/gpio_sw/PE5/data
+cat /sys/class/gpio_sw/PG13/data
+cat /sys/class/gpio_sw/PH10/data
+cat /sys/class/gpio_sw/PH2/data
+cat /sys/class/gpio_sw/PH3/data
+cat /sys/class/gpio_sw/PH4/data
+cat /sys/class/gpio_sw/PH5/data
+cat /sys/class/gpio_sw/PL10/data
+cat /sys/class/gpio_sw/PL8/data
+cat /sys/class/gpio_sw/PL9/data
+
+echo 1 > /sys/class/gpio_sw/PB0/data
+echo 1 > /sys/class/gpio_sw/PB1/data
+echo 1 > /sys/class/gpio_sw/PB2/data
+echo 1 > /sys/class/gpio_sw/PB3/data
+echo 1 > /sys/class/gpio_sw/PC0/data
+echo 1 > /sys/class/gpio_sw/PC1/data
+echo 1 > /sys/class/gpio_sw/PC17/data
+echo 1 > /sys/class/gpio_sw/PC2/data
+echo 1 > /sys/class/gpio_sw/PC3/data
+echo 1 > /sys/class/gpio_sw/PC4/data
+echo 1 > /sys/class/gpio_sw/PC7/data
+echo 1 > /sys/class/gpio_sw/PE5/data
+echo 1 > /sys/class/gpio_sw/PG13/data
+echo 1 > /sys/class/gpio_sw/PH10/data
+echo 1 > /sys/class/gpio_sw/PH2/data
+echo 1 > /sys/class/gpio_sw/PH3/data
+echo 1 > /sys/class/gpio_sw/PH4/data
+echo 1 > /sys/class/gpio_sw/PH5/data
+echo 1 > /sys/class/gpio_sw/PL10/data
+echo 1 > /sys/class/gpio_sw/PL8/data
+echo 1 > /sys/class/gpio_sw/PL9/data
+
+
+echo 0 > /sys/class/gpio_sw/PB0/data
+echo 0 > /sys/class/gpio_sw/PB1/data
+echo 0 > /sys/class/gpio_sw/PB2/data
+echo 0 > /sys/class/gpio_sw/PB3/data
+echo 0 > /sys/class/gpio_sw/PC0/data
+echo 0 > /sys/class/gpio_sw/PC1/data
+echo 0 > /sys/class/gpio_sw/PC17/data
+echo 0 > /sys/class/gpio_sw/PC2/data
+echo 0 > /sys/class/gpio_sw/PC3/data
+echo 0 > /sys/class/gpio_sw/PC4/data
+echo 0 > /sys/class/gpio_sw/PC7/data
+echo 0 > /sys/class/gpio_sw/PE5/data
+echo 0 > /sys/class/gpio_sw/PG13/data
+echo 0 > /sys/class/gpio_sw/PH10/data
+echo 0 > /sys/class/gpio_sw/PH2/data
+echo 0 > /sys/class/gpio_sw/PH3/data
+echo 0 > /sys/class/gpio_sw/PH4/data
+echo 0 > /sys/class/gpio_sw/PH5/data
+echo 0 > /sys/class/gpio_sw/PL10/data
+echo 0 > /sys/class/gpio_sw/PL8/data
+echo 0 > /sys/class/gpio_sw/PL9/data

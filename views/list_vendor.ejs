@@ -2,7 +2,11 @@
 <%if (vendors.length > 0) { %>
   <b>Vendors:</b><br>
 <table cellspacing='0' cellpadding='2' border='1'>
-  <tr><th>Company</th><th>Area of work</th><th>Sub-area of work</th><th>Contact Name</th><th>Email</th><th>Phone</th><th>State</th><th>City</th><th>Locality</th></tr>
+  <tr>
+    <th>Company</th><th>Area of work</th><th>Sub-area of work</th><th>Contact Name</th>
+    <th>Email</th><th>Phone</th><th>State</th><th>City</th><th>Locality</th>
+    <th>Visiting Card</th><th>Brochure</th><th>Edit</th>
+  </tr>
   <% for(var i=0; i<vendors.length; i++) {%>
     <tr>
       <td><%= vendors[i].company_name %></td>
@@ -14,6 +18,21 @@
       <td><%= vendors[i].state %></td>
       <td><%= vendors[i].city %></td>
       <td><%= vendors[i].locality %></td>
+      <td>
+      <% if(vendors[i].visiting_card_file){ %>
+        <a target='_blank' href="<%= vendors[i].visiting_card_file %>">View</a>
+      <% } else{ %>
+        &nbsp;
+      <% } %>
+      </td>
+      <td>
+      <% if(vendors[i].brochure_file){ %>
+        <a target='_blank' href="<%= vendors[i].brochure_file %>">View</a>
+      <% } else{ %>
+        &nbsp;
+      <% } %>
+      </td>
+      <td><a href="/edit_vendor.html?id=<%= vendors[i]._id %>">Edit</a></td>
     </tr>
   <% } %>
 </table>

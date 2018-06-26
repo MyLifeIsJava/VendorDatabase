@@ -20,3 +20,6 @@
 
 4. Install mongodb module
   $ npm install mongodb --save
+
+5. Run server and check for the console output
+  $ node server.js

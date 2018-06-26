@@ -9,42 +9,20 @@
   <script src="/js/jquery.validate.min.js"></script>
   <!-- TODO: Move the javascript here to a separate js file -->
   <script>
-    /* Auto submit the vising card form as and when user selects the file */
-    /*$('#visitingCardFile').change(function() {
-      $('#visitingCardForm').submit();
-    });*/
-    /* Auto submit the brochure form as and when user selects the file */
-    /*$('#brochureFile').change(function() {
-      $('#brochureForm').submit();
-    });*/
 
     $().ready(function() {
-      /* Submit the main form on click of Save button */
-      $('#formSubmitBtn').click(
-        function(){
-          $("#saveVendorForm").submit()
-          //alert("Button clicked");
-        }
-      );
-      /* Submit the visiting card form using Ajax*/
-      /*
-      $('#visitingCardForm').submit(function() {
-         $("#visitingcardUploadStatus").empty().text("Uploading...");
-         $(this).ajaxSubmit({
-             error: function(xhr) {
-               $("#visitingcardUploadStatus").empty().text("Failed to upload the file!");
-             },
-             success: function(response) {
-               $("#status").empty().text(response);
-              console.log(response);
-             }
-           });
-         //Very important line, it disable the page refresh.
-         return false;
+      /* Auto submit the vising card form as and when user selects the file */
+      $('#visitingCardFile').change(function() {
+        $('#visitingCardForm').submit();
       });
-      */
-
+      /* Auto submit the brochure form as and when user selects the file */
+      $('#brochureFile').change(function() {
+        $('#brochureForm').submit();
+      });
       /* Form validations, mainly checking for mandatory fields */
+      // We need to have the below empty validate calls when we have multilpe forms and we need to validate only one/few form
+      $("#visitingCardForm").validate();
+      $("#brochureForm").validate();
       $("#saveVendorForm").validate({
         rules: {
           company_name: "required",
@@ -77,36 +55,114 @@
               },
               success: function(response) {
                 alert(response);
+                $('#visitingCardForm')[0].reset();
+                $('#brochureForm')[0].reset();
+                $('#saveVendorForm')[0].reset();
+                $("#visitingcardUploadStatus").empty();
+                $("#brochureUploadStatus").empty();
+                // If we have updated an existing vendor, then go to the previous page
+                <% if(vendor._id){%>
+                  location.reload();
+                <% } %>
               }
             });
         }
       });
+      /* Submit the main form on click of Save button */
+      $('#formSubmitBtn').click(
+        function(){
+          $("#saveVendorForm").submit()
+        }
+      );
+      /* Submit the visiting card form using Ajax*/
+
+      $('#visitingCardForm').submit(function() {
+         $("#visitingcardUploadStatus").empty().text("Uploading...");
+         $(this).ajaxSubmit({
+             error: function(xhr) {
+               $("#visitingcardUploadStatus").empty().text("Failed to upload the file!");
+             },
+             success: function(response) {
+               $("#visitingcardUploadStatus").empty().text("Uploaded");
+               $("#visiting_card_file").val(response);
+               if(response){
+                 $("#visitingCardView").show();
+                 $("#visitingCardAnchor").attr("href", response);
+               }else{
+                 $("#visitingCardView").hide();
+                 $("#visitingCardAnchor").attr("href","");
+               }
+             }
+           });
+         return false;
+      });
+      $('#brochureForm').submit(function() {
+         $("#brochureUploadStatus").empty().text("Uploading...");
+         $(this).ajaxSubmit({
+             error: function(xhr) {
+               $("#brochureUploadStatus").empty().text("Failed to upload the file!");
+             },
+             success: function(response) {
+               $("#brochureUploadStatus").empty().text("Uploaded");
+               $("#brochure_file").val(response);
+               if(response){
+                 $("#brochureView").show();
+                 $("#brochureAnchor").attr("href", response);
+               }else{
+                 $("#brochureView").hide();
+                 $("#brochureAnchor").attr("href","");
+               }
+             }
+           });
+         return false;
+      });
+
+
     });
   </script>
 </head>
 <body>
-<b>Add Vendor.</b><br>
+<b><%= (vendor._id ? "Update" : "Add") %> Vendor.</b><br>
 <form id="saveVendorForm" action="/saveVendor" method="POST">
   <table>
-    <tr><td>Company Name</td><td><input type="text" placeholder="Company Name" name="company_name"/></td></tr>
-    <tr><td>Contact Person Name</td><td><input type="text" placeholder="Contact Person Name" name="contact_name"/></td></tr>
-    <tr><td>Area of working</td><td><input type="text" placeholder="Area of working" name="working_area"/></td></tr>
-    <tr><td>Sub-area of working</td><td><input type="text" placeholder="Sub-area of working" name="working_sub_area"/></td></tr>
-    <tr><td>Email</td><td><input type="text" placeholder="Email" name="email"/></td></tr>
-    <tr><td>Phone</td><td><input type="text" placeholder="Phone" name="phone"/></td></tr>
-    <tr><td>State</td><td><input type="text" placeholder="State" name="state"/></td></tr>
-    <tr><td>City</td><td><input type="text" placeholder="City" name="city"/></td></tr>
-    <tr><td>Locality</td><td><input type="text" placeholder="Locality" name="locality"/></td></tr>
-    <tr><td>Address</td><td><input type="text" placeholder="Address" name="address"/></td></tr>
+    <% if(vendor) { %>
+      <input type='hidden' name='id' value='<%= vendor._id %>'/>
+    <% } %>
+    <tr><td>Company Name</td><td><input type="text" placeholder="Company Name" name="company_name" value="<%= vendor.company_name %>"/></td></tr>
+    <tr><td>Contact Person Name</td><td><input type="text" placeholder="Contact Person Name" name="contact_name" value="<%= vendor.contact_name %>"/></td></tr>
+    <tr><td>Area of working</td><td><input type="text" placeholder="Area of working" name="working_area" value="<%= vendor.working_area %>"/></td></tr>
+    <tr><td>Sub-area of working</td><td><input type="text" placeholder="Sub-area of working" name="working_sub_area" value="<%= vendor.working_sub_area %>"/></td></tr>
+    <tr><td>Email</td><td><input type="text" placeholder="Email" name="email" value="<%= vendor.email %>"/></td></tr>
+    <tr><td>Phone</td><td><input type="text" placeholder="Phone" name="phone" value="<%= vendor.phone %>"/></td></tr>
+    <tr><td>State</td><td><input type="text" placeholder="State" name="state" value="<%= vendor.state %>"/></td></tr>
+    <tr><td>City</td><td><input type="text" placeholder="City" name="city" value="<%= vendor.city %>"/></td></tr>
+    <tr><td>Locality</td><td><input type="text" placeholder="Locality" name="locality" value="<%= vendor.locality %>"/></td></tr>
+    <tr><td>Address</td><td><input type="text" placeholder="Address" name="address" value="<%= vendor.address %>"/></td></tr>
+    <input type='hidden' id='visiting_card_file' name='visiting_card_file'  value="<%= vendor.visiting_card_file %>"/>
+    <input type='hidden' id='brochure_file' name='brochure_file'  value="<%= vendor.brochure_file %>"/>
 </form>
-<!--
-<form id="visitingCardForm" action="" method="POST" enctype="multipart/form-data">
-    <tr><td>Vising Card</td><td><input type="file" id="visitingCardFile" name="file" size="50"/></td><td><div id="visitingcardUploadStatus"></div></td></tr>
+
+<form id="visitingCardForm" action="file_upload" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="type" value="visiting_card"/>
+    <tr><td valign='top'>Vising Card</td><td>
+      <table>
+        <tr id='visitingCardView' style='<%= (vendor.visiting_card_file ? vendor.visiting_card_file : "display:none") %>'><td><a id='visitingCardAnchor' href='<%= vendor.visiting_card_file %>' target='_blank'>View</a></td></tr>
+        <tr><td><input type="file" id="visitingCardFile" name="file" size="50"/></td></tr>
+        <tr><td><div id="visitingcardUploadStatus"></div></td></tr>
+      </table>
+    </td>
 </form>
-<form id="brochureForm" action="" method="POST" enctype="multipart/form-data">
-    <tr><td>Brochure</td><td><input type="file" id="brochureFile" name="file" size="50"/></td><td><div id="brochureUploadStatus"></div></td></tr>
+
+<form id="brochureForm" action="file_upload" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="type" value="brochure"/>
+    <tr><td valign='top'>Brochure</td><td>
+      <table>
+        <tr id='brochureView' style='<%= (vendor.brochure_file ? vendor.brochure_file : "display:none") %>'><td><a id='brochureAnchor' href='<%= vendor.brochure_file %>' target='_blank'>View</a></td></tr>
+        <tr><td><input type="file" id="brochureFile" name="file" size="50"/></td></tr>
+        <tr><td><div id="brochureUploadStatus"></div></td></tr>
+      </table>
+    </td>
 </form>
--->
     <tr><td colspan=2><input id="formSubmitBtn" type='button' value='Save Vendor'/></td></tr>
 
 </table>
